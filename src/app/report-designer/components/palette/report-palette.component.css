@@ -1,0 +1,113 @@
+.left-panel {
+  position: sticky;
+  top: 88px;
+  display: grid;
+  gap: 18px;
+  max-height: calc(100vh - 106px);
+  overflow: auto;
+  border: 1px solid var(--designer-border, #d9e2ef);
+  border-radius: 8px;
+  background: var(--designer-panel, #ffffff);
+  padding: 16px;
+  box-shadow: var(--designer-shadow, 0 18px 50px rgba(39, 52, 79, 0.08));
+}
+
+.panel-header {
+  display: grid;
+  gap: 2px;
+}
+
+.eyebrow {
+  margin: 0 0 3px;
+  color: var(--designer-muted, #64748b);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h2 {
+  color: var(--designer-text, #172033);
+  font-size: 16px;
+}
+
+h3 {
+  color: var(--designer-text, #253044);
+  font-size: 13px;
+}
+
+.palette {
+  display: grid;
+  gap: 10px;
+}
+
+.palette-item {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 11px;
+  align-items: center;
+  width: 100%;
+  border: 1px solid var(--designer-border, #d8e0ee);
+  border-radius: 8px;
+  background: var(--designer-control, #ffffff);
+  color: var(--designer-text, #172033);
+  padding: 10px;
+  text-align: left;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.palette-item:hover {
+  transform: translateY(-1px);
+  border-color: #9aa7ff;
+  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.12);
+}
+
+.palette-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--designer-primary, #4f46e5) 14%, transparent);
+  color: var(--designer-primary, #4f46e5);
+  font-weight: 900;
+}
+
+.palette-item strong,
+.palette-item small {
+  display: block;
+}
+
+.palette-item small {
+  margin-top: 3px;
+  color: var(--designer-muted, #64748b);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.quick-help {
+  display: grid;
+  gap: 8px;
+  border-radius: 8px;
+  background: var(--designer-panel-soft, #f7fafc);
+  color: var(--designer-muted, #64748b);
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .left-panel {
+    position: static;
+    max-height: none;
+  }
+}

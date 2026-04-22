@@ -1,0 +1,30 @@
+<aside class="left-panel" aria-label="Report components">
+  <div class="panel-header">
+    <p class="eyebrow">Blocks</p>
+    <h2>Components</h2>
+  </div>
+
+  <div class="palette">
+    @for (item of state.palette; track item.kind) {
+      <button
+        class="palette-item"
+        type="button"
+        draggable="true"
+        (dragstart)="startPaletteDrag($event, item.kind)"
+        (click)="state.addElement(item.kind)"
+        [title]="'Add ' + item.label"
+      >
+        <span class="palette-icon">{{ item.icon }}</span>
+        <span>
+          <strong>{{ item.label }}</strong>
+          <small>{{ item.description }}</small>
+        </span>
+      </button>
+    }
+  </div>
+
+  <div class="quick-help">
+    <h3>Synced JSON model</h3>
+    <p>Every edit updates one report document. Export or import that JSON when you need a file handoff.</p>
+  </div>
+</aside>

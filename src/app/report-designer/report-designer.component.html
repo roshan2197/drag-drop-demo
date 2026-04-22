@@ -1,0 +1,59 @@
+<main class="designer-shell min-h-screen" [class.theme-dark]="state.theme() === 'dark'">
+  <header class="topbar gap-4">
+    <section class="brand-block min-w-0">
+      <div class="brand-mark">R</div>
+      <div>
+        <p class="eyebrow">Report designer</p>
+        <h1>{{ state.report().title }}</h1>
+      </div>
+    </section>
+
+    <section class="report-meta" aria-label="Report settings">
+      <label>
+        <span>Title</span>
+        <input
+          type="text"
+          [ngModel]="state.report().title"
+          (ngModelChange)="state.updateMeta({ title: $event })"
+        />
+      </label>
+      <label>
+        <span>Subtitle</span>
+        <input
+          type="text"
+          [ngModel]="state.report().subtitle"
+          (ngModelChange)="state.updateMeta({ subtitle: $event })"
+        />
+      </label>
+    </section>
+
+    <section class="toolbar flex flex-wrap" aria-label="Designer actions">
+      <button
+        class="icon-button"
+        type="button"
+        (click)="state.setShowGrid(!state.showGrid())"
+        title="Toggle grid"
+      >
+        ⊞
+      </button>
+      <button class="icon-button" type="button" (click)="state.toggleTheme()" title="Toggle theme">
+        {{ state.theme() === 'dark' ? '☼' : '◐' }}
+      </button>
+      <button class="icon-button" type="button" (click)="state.sendBackward()" title="Send backward">
+        ↓
+      </button>
+      <button class="icon-button" type="button" (click)="state.bringForward()" title="Bring forward">
+        ↑
+      </button>
+      <button class="text-button" type="button" (click)="state.duplicateSelected()">Duplicate</button>
+      <button class="text-button danger" type="button" (click)="state.deleteSelected()">Delete</button>
+      <button class="primary-button" type="button" (click)="exportPdf()">Export PDF</button>
+    </section>
+  </header>
+
+  <section class="workspace gap-4">
+    <app-report-palette />
+    <app-report-canvas />
+    <app-report-inspector />
+  </section>
+</main>

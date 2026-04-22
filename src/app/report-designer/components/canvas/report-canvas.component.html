@@ -1,0 +1,163 @@
+<section class="stage" aria-label="Report canvas">
+  <div class="stage-header">
+    <div>
+      <p class="eyebrow">Canvas</p>
+      <h2>A4 report page</h2>
+    </div>
+
+    <label class="zoom-control">
+      <span>{{ state.zoom() }}%</span>
+      <input
+        type="range"
+        min="50"
+        max="140"
+        step="2"
+        [ngModel]="state.zoom()"
+        (ngModelChange)="state.setZoom($event)"
+      />
+    </label>
+  </div>
+
+  <div class="page-wrap" (wheel)="onWheel($event)">
+    <article
+      #pageCanvas
+      class="report-page"
+      [class.grid-on]="state.showGrid()"
+      [style.width.px]="state.report().page.width"
+      [style.height.px]="state.report().page.height"
+      [style.background-color]="state.report().page.background"
+      [style.transform]="'scale(' + state.zoom() / 100 + ')'"
+      (click)="state.clearSelection()"
+      (dragover)="allowDrop($event)"
+      (drop)="dropOnCanvas($event)"
+    >
+      <div
+        class="page-margin-box"
+        [style.inset.px]="state.report().page.margin"
+        aria-hidden="true"
+      ></div>
+      <div class="page-watermark">
+        <span>{{ state.report().subtitle }}</span>
+      </div>
+
+      @for (guide of snapGuides(); track guide.id) {
+        <span
+          class="snap-guide"
+          [class.vertical]="guide.orientation === 'vertical'"
+          [class.horizontal]="guide.orientation === 'horizontal'"
+          [class.page-guide]="guide.source === 'page'"
+          [style.left.px]="guide.orientation === 'vertical' ? guide.position : guide.start"
+          [style.top.px]="guide.orientation === 'horizontal' ? guide.position : guide.start"
+          [style.width.px]="guide.orientation === 'horizontal' ? guide.end - guide.start : null"
+          [style.height.px]="guide.orientation === 'vertical' ? guide.end - guide.start : null"
+        ></span>
+      }
+
+      @for (measure of measurementGuides(); track measure.id) {
+        <span
+          class="measure-guide"
+          [class.vertical]="measure.orientation === 'vertical'"
+          [class.horizontal]="measure.orientation === 'horizontal'"
+          [style.left.px]="measure.orientation === 'horizontal' ? measure.start : measure.crossAxis"
+          [style.top.px]="measure.orientation === 'vertical' ? measure.start : measure.crossAxis"
+          [style.width.px]="measure.orientation === 'horizontal' ? measure.end - measure.start : null"
+          [style.height.px]="measure.orientation === 'vertical' ? measure.end - measure.start : null"
+        >
+          <span>{{ measure.label }}</span>
+        </span>
+      }
+
+      @if (dragBadge(); as badge) {
+        <span class="drag-badge" [style.left.px]="badge.x" [style.top.px]="badge.y">
+          {{ badge.text }}
+        </span>
+      }
+
+      @for (element of state.report().elements; track element.id) {
+        <section
+          class="report-element"
+          [class.selected]="state.selectedId() === element.id"
+          [class.bordered]="element.border"
+          [ngClass]="'kind-' + element.kind"
+          [ngStyle]="elementStyle(element)"
+          (click)="$event.stopPropagation(); state.setSelected(element.id)"
+          (pointerdown)="startMove($event, element)"
+        >
+          <div class="element-content">
+            @switch (element.kind) {
+              @case ('metric') {
+                @let metric = metricParts(element.text);
+                <span class="metric-value">{{ metric.value }}</span>
+                <span class="metric-label">{{ metric.label }}</span>
+              }
+              @case ('table') {
+                @if (element.table; as table) {
+                  <table class="data-table" [class.compact]="table.compact">
+                    @if (table.showHeader) {
+                      <thead>
+                        <tr>
+                          @for (cell of table.columns; track $index) {
+                            <th [style.background]="table.headerBackground">{{ cell }}</th>
+                          }
+                        </tr>
+                      </thead>
+                    }
+                    <tbody>
+                      @for (row of table.rows; track $index; let rowIndex = $index) {
+                        <tr [class.zebra]="table.zebraRows && rowIndex % 2 === 1">
+                          @for (column of table.columns; track $index; let columnIndex = $index) {
+                            <td>{{ row[columnIndex] }}</td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                }
+              }
+              @case ('chart') {
+                <div class="chart-shell">
+                  <p class="chart-title">{{ element.text }}</p>
+                  <div class="bars" aria-hidden="true">
+                    <span class="bar" style="height: 42%"></span>
+                    <span class="bar" style="height: 68%"></span>
+                    <span class="bar" style="height: 54%"></span>
+                    <span class="bar" style="height: 82%"></span>
+                    <span class="bar" style="height: 63%"></span>
+                  </div>
+                </div>
+              }
+              @case ('image') {
+                <div class="image-placeholder">
+                  <span>{{ element.text }}</span>
+                </div>
+              }
+              @case ('divider') {
+                <span class="divider-line"></span>
+              }
+              @default {
+                {{ element.text }}
+              }
+            }
+          </div>
+
+          @if (state.selectedId() === element.id) {
+            <div class="selection-outline" aria-hidden="true"></div>
+            <div class="element-tools">{{ element.title }}</div>
+            <span
+              class="resize-handle handle-east"
+              (pointerdown)="startResize($event, element, 'east')"
+            ></span>
+            <span
+              class="resize-handle handle-south"
+              (pointerdown)="startResize($event, element, 'south')"
+            ></span>
+            <span
+              class="resize-handle handle-south-east"
+              (pointerdown)="startResize($event, element, 'south-east')"
+            ></span>
+          }
+        </section>
+      }
+    </article>
+  </div>
+</section>

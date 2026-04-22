@@ -1,0 +1,375 @@
+<aside class="right-panel" aria-label="Properties inspector">
+  <div class="panel-header">
+    <p class="eyebrow">Inspector</p>
+    <h2>{{ activeTab() === 'page' ? 'Page settings' : 'Properties' }}</h2>
+  </div>
+
+  <div class="inspector-tabs" role="tablist" aria-label="Inspector tabs">
+    <button
+      type="button"
+      [class.active]="activeTab() === 'element'"
+      [disabled]="!state.selectedElement()"
+      (click)="setTab('element')"
+    >
+      Element
+    </button>
+    <button type="button" [class.active]="activeTab() === 'page'" (click)="setTab('page')">
+      Page
+    </button>
+    <button
+      type="button"
+      [class.active]="activeTab() === 'data'"
+      [disabled]="state.selectedElement()?.kind !== 'table'"
+      (click)="setTab('data')"
+    >
+      Table
+    </button>
+  </div>
+
+  @if (activeTab() === 'page') {
+    <div class="inspector-section hero-section">
+      <div>
+        <h3>Document</h3>
+        <p class="muted">Clicking the page selects this panel. These values are stored in the same JSON model.</p>
+      </div>
+      <label>
+        <span>Preset</span>
+        <select
+          [ngModel]="state.report().page.preset"
+          (ngModelChange)="state.updatePage({ preset: $event })"
+        >
+          @for (preset of pagePresets; track preset) {
+            <option [value]="preset">{{ preset }}</option>
+          }
+        </select>
+      </label>
+      <div class="input-grid">
+        <label>
+          <span>Width</span>
+          <input
+            type="number"
+            [ngModel]="state.report().page.width"
+            (ngModelChange)="updatePageNumber('width', $event)"
+          />
+        </label>
+        <label>
+          <span>Height</span>
+          <input
+            type="number"
+            [ngModel]="state.report().page.height"
+            (ngModelChange)="updatePageNumber('height', $event)"
+          />
+        </label>
+        <label>
+          <span>Margin</span>
+          <input
+            type="number"
+            min="0"
+            max="180"
+            [ngModel]="state.report().page.margin"
+            (ngModelChange)="updatePageNumber('margin', $event)"
+          />
+        </label>
+        <label>
+          <span>Bleed</span>
+          <input
+            type="number"
+            min="0"
+            max="48"
+            [ngModel]="state.report().page.bleed"
+            (ngModelChange)="updatePageNumber('bleed', $event)"
+          />
+        </label>
+      </div>
+      <label>
+        <span>Page background</span>
+        <input
+          class="color-input"
+          type="color"
+          [ngModel]="state.report().page.background"
+          (ngModelChange)="state.updatePage({ background: $event })"
+        />
+      </label>
+    </div>
+
+    <div class="inspector-section">
+      <h3>JSON sync</h3>
+      <div class="file-actions">
+        <button class="text-button" type="button" (click)="state.exportJson()">Export JSON</button>
+        <label class="file-import">
+          <span>Import</span>
+          <input type="file" accept="application/json" (change)="importJson($event)" />
+        </label>
+        <button class="text-button danger" type="button" (click)="state.resetToTemplate()">Reset</button>
+      </div>
+      <p class="muted">Saved locally after each edit. The same document shape can be sent to a backend later.</p>
+    </div>
+  }
+
+  @if (activeTab() === 'element') {
+    @if (state.selectedElement(); as element) {
+      <div class="property-card">
+        <div class="property-summary">
+          <span>{{ element.kind }}</span>
+          <strong>{{ element.title }}</strong>
+          <small>{{ element.x }}, {{ element.y }} · {{ element.width }} × {{ element.height }}</small>
+        </div>
+      </div>
+
+      <div class="inspector-section">
+        <label>
+          <span>Name</span>
+          <input
+            type="text"
+            [ngModel]="element.title"
+            (ngModelChange)="update(element, { title: $event })"
+          />
+        </label>
+
+        @if (element.kind !== 'divider' && element.kind !== 'table') {
+          <label>
+            <span>Content</span>
+            <textarea
+              rows="5"
+              [ngModel]="element.text"
+              (ngModelChange)="update(element, { text: $event })"
+            ></textarea>
+          </label>
+        }
+      </div>
+
+      <div class="inspector-section">
+        <h3>Layout</h3>
+        <div class="input-grid">
+          <label>
+            <span>X</span>
+            <input
+              type="number"
+              [ngModel]="element.x"
+              (ngModelChange)="updateNumber(element, 'x', $event)"
+            />
+          </label>
+          <label>
+            <span>Y</span>
+            <input
+              type="number"
+              [ngModel]="element.y"
+              (ngModelChange)="updateNumber(element, 'y', $event)"
+            />
+          </label>
+          <label>
+            <span>W</span>
+            <input
+              type="number"
+              [ngModel]="element.width"
+              (ngModelChange)="updateNumber(element, 'width', $event)"
+            />
+          </label>
+          <label>
+            <span>H</span>
+            <input
+              type="number"
+              [ngModel]="element.height"
+              (ngModelChange)="updateNumber(element, 'height', $event)"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div class="inspector-section">
+        <h3>Appearance</h3>
+        <div class="input-grid">
+          <label>
+            <span>Size</span>
+            <input
+              type="number"
+              min="8"
+              max="72"
+              [ngModel]="element.fontSize"
+              (ngModelChange)="updateNumber(element, 'fontSize', $event)"
+            />
+          </label>
+          <label>
+            <span>Radius</span>
+            <input
+              type="number"
+              min="0"
+              max="32"
+              [ngModel]="element.radius"
+              (ngModelChange)="updateNumber(element, 'radius', $event)"
+            />
+          </label>
+        </div>
+
+        <div class="input-grid">
+          <label>
+            <span>Text</span>
+            <input
+              class="color-input"
+              type="color"
+              [ngModel]="element.color"
+              (ngModelChange)="update(element, { color: $event })"
+            />
+          </label>
+          <label>
+            <span>Fill</span>
+            <input
+              class="color-input"
+              type="color"
+              [ngModel]="element.background"
+              (ngModelChange)="update(element, { background: $event })"
+            />
+          </label>
+        </div>
+
+        <div class="segmented" role="group" aria-label="Text alignment">
+          <button
+            type="button"
+            [class.active]="element.align === 'left'"
+            (click)="update(element, { align: 'left' })"
+          >
+            Left
+          </button>
+          <button
+            type="button"
+            [class.active]="element.align === 'center'"
+            (click)="update(element, { align: 'center' })"
+          >
+            Center
+          </button>
+          <button
+            type="button"
+            [class.active]="element.align === 'right'"
+            (click)="update(element, { align: 'right' })"
+          >
+            Right
+          </button>
+        </div>
+
+        <div class="toggle-grid">
+          <label class="toggle">
+            <input
+              type="checkbox"
+              [ngModel]="element.bold"
+              (ngModelChange)="update(element, { bold: $event })"
+            />
+            <span>Bold text</span>
+          </label>
+          <label class="toggle">
+            <input
+              type="checkbox"
+              [ngModel]="element.border"
+              (ngModelChange)="update(element, { border: $event })"
+            />
+            <span>Border</span>
+          </label>
+        </div>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <h3>No block selected</h3>
+        <p>Click a block to edit it, or use the Page tab for document settings.</p>
+      </div>
+    }
+  }
+
+  @if (activeTab() === 'data') {
+    @if (state.selectedElement(); as element) {
+      @if (element.kind === 'table' && element.table; as table) {
+        <div class="inspector-section table-toolbar">
+          <h3>Table toolbar</h3>
+
+          <div class="toolbar-row">
+            <button class="text-button" type="button" (click)="state.addTableRow(element.id)">
+              Add row
+            </button>
+            <button class="text-button" type="button" (click)="state.addTableColumn(element.id)">
+              Add column
+            </button>
+          </div>
+
+          <div class="toggle-grid">
+            <label class="toggle">
+              <input
+                type="checkbox"
+                [ngModel]="table.showHeader"
+                (ngModelChange)="toggleTableOption(element, 'showHeader')"
+              />
+              <span>Header</span>
+            </label>
+            <label class="toggle">
+              <input
+                type="checkbox"
+                [ngModel]="table.zebraRows"
+                (ngModelChange)="toggleTableOption(element, 'zebraRows')"
+              />
+              <span>Zebra rows</span>
+            </label>
+            <label class="toggle">
+              <input
+                type="checkbox"
+                [ngModel]="table.compact"
+                (ngModelChange)="toggleTableOption(element, 'compact')"
+              />
+              <span>Compact</span>
+            </label>
+          </div>
+
+          <label>
+            <span>Header background</span>
+            <input
+              class="color-input"
+              type="color"
+              [ngModel]="table.headerBackground"
+              (ngModelChange)="state.updateTableHeaderBackground(element.id, $event)"
+            />
+          </label>
+
+          <div class="table-editor">
+            <div class="table-editor-row header-row">
+              @for (column of table.columns; track $index; let columnIndex = $index) {
+                <label>
+                  <span>Column {{ columnIndex + 1 }}</span>
+                  <input
+                    type="text"
+                    [ngModel]="column"
+                    (ngModelChange)="state.updateTableColumn(element.id, columnIndex, $event)"
+                  />
+                  <button
+                    class="icon-button danger"
+                    type="button"
+                    title="Remove column"
+                    (click)="state.removeTableColumn(element.id, columnIndex)"
+                  >
+                    ×
+                  </button>
+                </label>
+              }
+            </div>
+
+            @for (row of table.rows; track $index; let rowIndex = $index) {
+              <div class="table-editor-row">
+                @for (column of table.columns; track $index; let columnIndex = $index) {
+                  <input
+                    type="text"
+                    [ngModel]="row[columnIndex]"
+                    (ngModelChange)="state.updateTableCell(element.id, rowIndex, columnIndex, $event)"
+                    [attr.aria-label]="'Row ' + (rowIndex + 1) + ', ' + column"
+                  />
+                }
+                <button
+                  class="icon-button danger"
+                  type="button"
+                  title="Remove row"
+                  (click)="state.removeTableRow(element.id, rowIndex)"
+                >
+                  ×
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  }
+</aside>
