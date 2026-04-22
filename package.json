@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "gh-pages": "npm run build && npx gh-pages -d dist/drag-drop-demo"
+    "gh-pages": "ng build --configuration production --output-path dist --base-href /drag-drop-demo/ && npx angular-cli-ghpages --dir=dist/browser"
   },
   "prettier": {
     "printWidth": 100,
@@ -31,6 +31,7 @@
     "@angular/platform-browser": "^21.1.0",
     "@angular/router": "^21.1.0",
     "@types/pdfmake": "^0.2.11",
+    "angular-cli-ghpages": "^3.0.2",
     "pdfmake": "^0.2.20",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
@@ -40,11 +41,11 @@
     "@angular/cli": "^21.1.2",
     "@angular/compiler-cli": "^21.1.0",
     "@tailwindcss/postcss": "^4.1.12",
+    "gh-pages": "^6.0.0",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.12",
     "typescript": "~5.9.2",
-    "vitest": "^4.0.8",
-    "gh-pages": "^6.0.0"
+    "vitest": "^4.0.8"
   }
 }
