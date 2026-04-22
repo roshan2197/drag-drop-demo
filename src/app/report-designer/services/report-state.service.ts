@@ -533,7 +533,10 @@ export class ReportStateService {
 
     this.report.set(nextDocument);
     if (persist) {
+      this.syncStatus.set('saving');
       localStorage.setItem(STORAGE_KEY, JSON.stringify(nextDocument));
+      this.lastSyncedAt.set(new Date().toLocaleTimeString());
+      this.syncStatus.set('saved');
     }
   }
 

@@ -57,7 +57,7 @@ button {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: minmax(260px, 1.2fr) minmax(260px, 1fr) auto;
+  grid-template-columns: minmax(240px, 1.2fr) minmax(320px, 1.4fr) minmax(280px, 1fr);
   gap: 18px;
   align-items: center;
   padding: 14px 18px;
@@ -70,6 +70,7 @@ button {
 .toolbar,
 .report-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
 }
 
@@ -91,13 +92,109 @@ button {
   font-weight: 800;
 }
 
-.eyebrow {
-  margin: 0 0 3px;
+.subtitle {
+  margin: 6px 0 0;
+  color: var(--designer-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 420px;
+}
+
+.report-meta {
+  gap: 14px;
+  width: 100%;
+}
+
+.meta-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.status-chip,
+.page-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--designer-border);
+  background: var(--designer-panel-soft);
+  min-width: 0;
+}
+
+.status-chip {
+  color: var(--designer-text);
+}
+
+.status-chip.saving .dot {
+  background: #f59e0b;
+}
+
+.status-chip .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+.status-chip strong,
+.page-chip strong {
+  display: block;
+}
+
+.status-chip small,
+.page-chip small {
   color: var(--designer-muted);
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0;
+}
+
+.page-chip span {
+  display: block;
+  color: var(--designer-muted);
+  font-size: 11px;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.toolbar {
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.icon-button,
+.text-button,
+.primary-button {
+  min-height: 38px;
+  border: 1px solid var(--designer-border);
+  border-radius: 8px;
+  background: var(--designer-control);
+  color: var(--designer-text);
+  font-weight: 800;
+}
+
+.icon-button {
+  width: 38px;
+  padding: 0;
+}
+
+.text-button,
+.primary-button {
+  padding: 0 13px;
+}
+
+.text-button.danger {
+  color: var(--designer-danger);
 }
 
 h1,

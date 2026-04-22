@@ -94,17 +94,6 @@ h3 {
   font-weight: 700;
 }
 
-.quick-help {
-  display: grid;
-  gap: 8px;
-  border-radius: 8px;
-  background: var(--designer-panel-soft, #f7fafc);
-  color: var(--designer-muted, #64748b);
-  padding: 14px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
 @media (max-width: 760px) {
   .left-panel {
     position: static;

@@ -5,41 +5,68 @@
       <div>
         <p class="eyebrow">Report designer</p>
         <h1>{{ state.report().title }}</h1>
+        <p class="subtitle">{{ state.report().subtitle || 'A modern editor for layouts, tables, and charts.' }}</p>
       </div>
     </section>
 
-    <section class="report-meta" aria-label="Report settings">
-      <label>
-        <span>Title</span>
-        <input
-          type="text"
-          [ngModel]="state.report().title"
-          (ngModelChange)="state.updateMeta({ title: $event })"
-        />
-      </label>
-      <label>
-        <span>Subtitle</span>
-        <input
-          type="text"
-          [ngModel]="state.report().subtitle"
-          (ngModelChange)="state.updateMeta({ subtitle: $event })"
-        />
-      </label>
+    <section class="report-meta" aria-label="Report overview">
+      <div class="meta-row">
+        <label>
+          <span>Title</span>
+          <input
+            type="text"
+            [ngModel]="state.report().title"
+            (ngModelChange)="state.updateMeta({ title: $event })"
+          />
+        </label>
+        <label>
+          <span>Subtitle</span>
+          <input
+            type="text"
+            [ngModel]="state.report().subtitle"
+            (ngModelChange)="state.updateMeta({ subtitle: $event })"
+          />
+        </label>
+      </div>
+
+      <div class="status-grid">
+        <div class="status-chip" [class.saving]="state.syncStatus() === 'saving'">
+          <span class="dot"></span>
+          <div>
+            <strong>{{ state.syncStatus() === 'saving' ? 'Saving...' : 'Saved' }}</strong>
+            <small>{{ state.lastSyncedAt() }}</small>
+          </div>
+        </div>
+        <div class="page-chip">
+          <span>Page</span>
+          <strong>{{ state.report().page.preset }}</strong>
+          <small>{{ state.report().page.width }} × {{ state.report().page.height }}</small>
+        </div>
+      </div>
     </section>
 
     <section class="toolbar flex flex-wrap" aria-label="Designer actions">
-      <button
-        class="icon-button"
-        type="button"
-        (click)="state.setShowGrid(!state.showGrid())"
-        title="Toggle grid"
-      >
+      <button class="icon-button" type="button" (click)="state.undo()" [disabled]="!state.canUndo()" title="Undo">
+        ↺
+      </button>
+      <button class="icon-button" type="button" (click)="state.redo()" [disabled]="!state.canRedo()" title="Redo">
+        ↻
+      </button>
+      <button class="icon-button" type="button" (click)="state.copySelected()" title="Copy selected">
+        ⎘
+      </button>
+      <button class="icon-button" type="button" (click)="state.cutSelected()" title="Cut selected">
+        ✂
+      </button>
+      <button class="icon-button" type="button" (click)="state.pasteClipboard()" title="Paste clipboard">
+        ⎄
+      </button>
+      <button class="icon-button" type="button" (click)="state.setShowGrid(!state.showGrid())" title="Toggle grid">
         ⊞
       </button>
       <button class="icon-button" type="button" (click)="state.toggleTheme()" title="Toggle theme">
         {{ state.theme() === 'dark' ? '☼' : '◐' }}
       </button>
-      <button class="text-button" type="button" (click)="state.duplicateSelected()">Duplicate</button>
       <button class="text-button danger" type="button" (click)="state.deleteSelected()">Delete</button>
       <button class="primary-button" type="button" (click)="exportPdf()">Export PDF</button>
     </section>
