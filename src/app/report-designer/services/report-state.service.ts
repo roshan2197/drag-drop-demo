@@ -587,6 +587,7 @@ export class ReportStateService {
       background: element.background ?? '#ffffff',
       align: element.align ?? 'left',
       bold: element.bold ?? false,
+      italic: element.italic ?? false,
       border: element.border ?? false,
       borderWidth: element.borderWidth ?? 1,
       borderColor: element.borderColor ?? '#d8e0ee',
@@ -617,6 +618,7 @@ export class ReportStateService {
       borderWidth: 1,
       borderColor: '#d8e0ee',
       bold: false,
+      italic: false,
       radius: 8,
     };
 

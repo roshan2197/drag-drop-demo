@@ -53,6 +53,7 @@ export class ReportCanvasComponent {
       background: element.background,
       'font-size': `${element.fontSize}px`,
       'font-weight': element.bold ? '700' : '500',
+      'font-style': element.italic ? 'italic' : 'normal',
       'text-align': element.align,
       'border-radius': `${element.radius}px`,
       border: element.border ? `${element.borderWidth}px solid ${element.borderColor}` : '1px solid transparent',

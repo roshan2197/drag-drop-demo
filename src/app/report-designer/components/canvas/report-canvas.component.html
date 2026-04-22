@@ -9,9 +9,9 @@
       <span>{{ state.zoom() }}%</span>
       <input
         type="range"
-        min="50"
-        max="140"
-        step="2"
+        min="25"
+        max="500"
+        step="5"
         [ngModel]="state.zoom()"
         (ngModelChange)="state.setZoom($event)"
       />

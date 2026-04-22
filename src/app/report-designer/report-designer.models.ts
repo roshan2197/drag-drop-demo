@@ -46,6 +46,7 @@ export interface ReportElement {
   background: string;
   align: TextAlign;
   bold: boolean;
+  italic: boolean;
   border: boolean;
   borderWidth: number;
   borderColor: string;

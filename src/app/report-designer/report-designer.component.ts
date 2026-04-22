@@ -46,6 +46,24 @@ export class ReportDesignerComponent {
       return;
     }
 
+    if (isCmd && event.key.toLowerCase() === 'c') {
+      event.preventDefault();
+      this.state.copySelected();
+      return;
+    }
+
+    if (isCmd && event.key.toLowerCase() === 'x') {
+      event.preventDefault();
+      this.state.cutSelected();
+      return;
+    }
+
+    if (isCmd && event.key.toLowerCase() === 'v') {
+      event.preventDefault();
+      this.state.pasteClipboard();
+      return;
+    }
+
     if (!selected) {
       return;
     }
