@@ -30,7 +30,7 @@ interface DragBadge {
   selector: 'app-report-canvas',
   imports: [CommonModule, FormsModule],
   templateUrl: './report-canvas.component.html',
-  styleUrl: './report-canvas.component.css',
+  styleUrls: ['./report-canvas.component.css'],
 })
 export class ReportCanvasComponent {
   @ViewChild('pageCanvas') private pageCanvas?: ElementRef<HTMLElement>;
@@ -55,7 +55,7 @@ export class ReportCanvasComponent {
       'font-weight': element.bold ? '700' : '500',
       'text-align': element.align,
       'border-radius': `${element.radius}px`,
-      'border-color': element.border ? '#d8e0ee' : 'transparent',
+      border: element.border ? `${element.borderWidth}px solid ${element.borderColor}` : '1px solid transparent',
     };
   }
 
@@ -100,6 +100,7 @@ export class ReportCanvasComponent {
       originalY: element.y,
       originalWidth: element.width,
       originalHeight: element.height,
+      changed: false,
     };
   }
 
@@ -116,6 +117,7 @@ export class ReportCanvasComponent {
       originalWidth: element.width,
       originalHeight: element.height,
       handle,
+      changed: false,
     };
   }
 
@@ -157,7 +159,8 @@ export class ReportCanvasComponent {
       });
       const snapped = this.snapRect(candidate);
 
-      this.state.moveElement(element.id, snapped.rect.x, snapped.rect.y, false);
+      this.activeDrag.changed = true;
+      this.state.moveElement(element.id, snapped.rect.x, snapped.rect.y, false, false, false);
       this.renderDragOverlay(snapped.rect, snapped.guides);
       return;
     }
@@ -181,12 +184,17 @@ export class ReportCanvasComponent {
     };
     const snapped = this.snapRect(candidate);
 
-    this.state.resizeElement(element.id, snapped.rect.width, snapped.rect.height, false);
+    this.activeDrag.changed = true;
+    this.state.resizeElement(element.id, snapped.rect.width, snapped.rect.height, false, false, false);
     this.renderDragOverlay(snapped.rect, snapped.guides);
   }
 
   @HostListener('window:pointerup')
   stopDrag(): void {
+    if (this.activeDrag?.changed) {
+      this.state.commitDrag();
+    }
+
     this.activeDrag = null;
     this.snapGuides.set([]);
     this.measurementGuides.set([]);

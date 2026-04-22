@@ -7,17 +7,24 @@
   <div class="inspector-tabs" role="tablist" aria-label="Inspector tabs">
     <button
       type="button"
+      title="Edit the selected block properties"
       [class.active]="activeTab() === 'element'"
       [disabled]="!state.selectedElement()"
       (click)="setTab('element')"
     >
       Element
     </button>
-    <button type="button" [class.active]="activeTab() === 'page'" (click)="setTab('page')">
+    <button
+      type="button"
+      title="Edit page properties like size, margin, and background"
+      [class.active]="activeTab() === 'page'"
+      (click)="setTab('page')"
+    >
       Page
     </button>
     <button
       type="button"
+      title="Edit table structure, rows, and formatting"
       [class.active]="activeTab() === 'data'"
       [disabled]="state.selectedElement()?.kind !== 'table'"
       (click)="setTab('data')"
@@ -264,6 +271,30 @@
             <span>Border</span>
           </label>
         </div>
+
+        <div class="input-grid">
+          <label>
+            <span>Border width</span>
+            <input
+              type="number"
+              min="0"
+              max="12"
+              [disabled]="!element.border"
+              [ngModel]="element.borderWidth"
+              (ngModelChange)="updateNumber(element, 'borderWidth', $event)"
+            />
+          </label>
+          <label>
+            <span>Border color</span>
+            <input
+              class="color-input"
+              type="color"
+              [disabled]="!element.border"
+              [ngModel]="element.borderColor"
+              (ngModelChange)="update(element, { borderColor: $event })"
+            />
+          </label>
+        </div>
       </div>
     } @else {
       <div class="empty-state">
@@ -280,16 +311,26 @@
           <h3>Table toolbar</h3>
 
           <div class="toolbar-row">
-            <button class="text-button" type="button" (click)="state.addTableRow(element.id)">
+            <button
+              class="text-button"
+              type="button"
+              title="Insert a new row below the current table"
+              (click)="state.addTableRow(element.id)"
+            >
               Add row
             </button>
-            <button class="text-button" type="button" (click)="state.addTableColumn(element.id)">
+            <button
+              class="text-button"
+              type="button"
+              title="Insert a new column at the end of the table"
+              (click)="state.addTableColumn(element.id)"
+            >
               Add column
             </button>
           </div>
 
-          <div class="toggle-grid">
-            <label class="toggle">
+          <div class="table-style-grid">
+            <label class="toggle" title="Show or hide the table header row">
               <input
                 type="checkbox"
                 [ngModel]="table.showHeader"
@@ -297,7 +338,7 @@
               />
               <span>Header</span>
             </label>
-            <label class="toggle">
+            <label class="toggle" title="Alternate row shading for easier reading">
               <input
                 type="checkbox"
                 [ngModel]="table.zebraRows"
@@ -305,7 +346,7 @@
               />
               <span>Zebra rows</span>
             </label>
-            <label class="toggle">
+            <label class="toggle" title="Use a compact row height for more data on the page">
               <input
                 type="checkbox"
                 [ngModel]="table.compact"
@@ -322,19 +363,23 @@
               type="color"
               [ngModel]="table.headerBackground"
               (ngModelChange)="state.updateTableHeaderBackground(element.id, $event)"
+              title="Change the header row background color"
             />
           </label>
 
           <div class="table-editor">
-            <div class="table-editor-row header-row">
+            <div class="table-editor-grid">
               @for (column of table.columns; track $index; let columnIndex = $index) {
-                <label>
-                  <span>Column {{ columnIndex + 1 }}</span>
-                  <input
-                    type="text"
-                    [ngModel]="column"
-                    (ngModelChange)="state.updateTableColumn(element.id, columnIndex, $event)"
-                  />
+                <div class="table-column-edit">
+                  <label>
+                    <span>Column {{ columnIndex + 1 }}</span>
+                    <input
+                      type="text"
+                      [ngModel]="column"
+                      (ngModelChange)="state.updateTableColumn(element.id, columnIndex, $event)"
+                      title="Edit the column label"
+                    />
+                  </label>
                   <button
                     class="icon-button danger"
                     type="button"
@@ -343,30 +388,36 @@
                   >
                     ×
                   </button>
-                </label>
+                </div>
               }
             </div>
 
-            @for (row of table.rows; track $index; let rowIndex = $index) {
-              <div class="table-editor-row">
-                @for (column of table.columns; track $index; let columnIndex = $index) {
-                  <input
-                    type="text"
-                    [ngModel]="row[columnIndex]"
-                    (ngModelChange)="state.updateTableCell(element.id, rowIndex, columnIndex, $event)"
-                    [attr.aria-label]="'Row ' + (rowIndex + 1) + ', ' + column"
-                  />
-                }
-                <button
-                  class="icon-button danger"
-                  type="button"
-                  title="Remove row"
-                  (click)="state.removeTableRow(element.id, rowIndex)"
-                >
-                  ×
-                </button>
-              </div>
-            }
+            <div class="table-rows">
+              @for (row of table.rows; track $index; let rowIndex = $index) {
+                <div class="table-row-edit">
+                  <span class="row-label">Row {{ rowIndex + 1 }}</span>
+                  <div class="row-cells">
+                    @for (column of table.columns; track $index; let columnIndex = $index) {
+                      <input
+                        type="text"
+                        [ngModel]="row[columnIndex]"
+                        (ngModelChange)="state.updateTableCell(element.id, rowIndex, columnIndex, $event)"
+                        [attr.aria-label]="'Row ' + (rowIndex + 1) + ', ' + column"
+                        title="Edit this cell"
+                      />
+                    }
+                  </div>
+                  <button
+                    class="icon-button danger"
+                    type="button"
+                    title="Remove row"
+                    (click)="state.removeTableRow(element.id, rowIndex)"
+                  >
+                    ×
+                  </button>
+                </div>
+              }
+            </div>
           </div>
         </div>
       }

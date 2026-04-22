@@ -11,7 +11,7 @@ import { ReportStateService } from './services/report-state.service';
   selector: 'app-report-designer',
   imports: [FormsModule, ReportPaletteComponent, ReportCanvasComponent, ReportInspectorComponent],
   templateUrl: './report-designer.component.html',
-  styleUrl: './report-designer.component.css',
+  styleUrls: ['./report-designer.component.css'],
 })
 export class ReportDesignerComponent {
   readonly state = inject(ReportStateService);
@@ -23,9 +23,30 @@ export class ReportDesignerComponent {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyboard(event: KeyboardEvent): void {
+    if (this.isTyping(event)) {
+      return;
+    }
+
+    const isCmd = event.ctrlKey || event.metaKey;
     const selected = this.state.selectedElement();
 
-    if (!selected || this.isTyping(event)) {
+    if (isCmd && event.key.toLowerCase() === 'z') {
+      event.preventDefault();
+      if (event.shiftKey) {
+        this.state.redo();
+      } else {
+        this.state.undo();
+      }
+      return;
+    }
+
+    if (isCmd && event.key.toLowerCase() === 'y') {
+      event.preventDefault();
+      this.state.redo();
+      return;
+    }
+
+    if (!selected) {
       return;
     }
 

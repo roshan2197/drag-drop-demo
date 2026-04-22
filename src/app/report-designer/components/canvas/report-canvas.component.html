@@ -80,7 +80,7 @@
           [class.bordered]="element.border"
           [ngClass]="'kind-' + element.kind"
           [ngStyle]="elementStyle(element)"
-          (click)="$event.stopPropagation(); state.setSelected(element.id)"
+          (click)="$event.stopPropagation(); state.setSelected(element.id, true)"
           (pointerdown)="startMove($event, element)"
         >
           <div class="element-content">

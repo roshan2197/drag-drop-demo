@@ -36,7 +36,7 @@ export class PdfExportService {
       pageMargins: [0, 0, 0, 0],
       defaultStyle: {
         font: 'Roboto',
-        color: '#172033',
+        color: '#0f172a',
       },
       content: [
         {
@@ -112,7 +112,7 @@ export class PdfExportService {
   private tableElementToPdf(
     element: ReportElement,
     base: { absolutePosition: { x: number; y: number }; margin: [number, number, number, number] },
-  ): ContentTable {
+  ): Content {
     const table = element.table ?? this.fallbackTable(element.text);
     const body: TableCell[][] = [];
 
@@ -122,7 +122,8 @@ export class PdfExportService {
           text: column,
           bold: true,
           fillColor: table.headerBackground,
-          color: '#475569',
+          color: '#0f172a',
+          alignment: 'left' as const,
         })),
       );
     }
@@ -131,28 +132,44 @@ export class PdfExportService {
       body.push(
         table.columns.map((_, columnIndex) => ({
           text: row[columnIndex] ?? '',
-          fillColor: table.zebraRows && rowIndex % 2 === 1 ? '#f8fafc' : '#ffffff',
+          color: '#0f172a',
+          alignment: 'left' as const,
         })),
       );
     });
 
     return {
       ...base,
-      table: {
-        widths: table.columns.map(() => element.width / Math.max(1, table.columns.length)),
-        heights: table.compact ? 20 : 28,
-        body,
-      },
-      layout: {
-        hLineColor: () => '#e7edf5',
-        vLineColor: () => '#e7edf5',
-        paddingLeft: () => 8,
-        paddingRight: () => 8,
-        paddingTop: () => (table.compact ? 5 : 8),
-        paddingBottom: () => (table.compact ? 5 : 8),
-      },
-      fontSize: element.fontSize,
-      color: element.color,
+      stack: [
+        this.backgroundCanvas(element),
+        {
+          table: {
+            headerRows: table.showHeader ? 1 : 0,
+            widths: table.columns.map(() => element.width / Math.max(1, table.columns.length)),
+            heights: table.compact ? 24 : 32,
+            body,
+          },
+          layout: {
+            fillColor: (rowIndex: number) =>
+              rowIndex === 0 && table.showHeader
+                ? table.headerBackground
+                : table.zebraRows && rowIndex % 2 === 1
+                ? '#f8fafc'
+                : '#ffffff',
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => '#cbd5e1',
+            vLineColor: () => '#cbd5e1',
+            paddingLeft: () => 10,
+            paddingRight: () => 10,
+            paddingTop: () => (table.compact ? 6 : 10),
+            paddingBottom: () => (table.compact ? 6 : 10),
+          },
+          fontSize: element.fontSize,
+          color: element.color,
+          margin: [8, 12, 8, 12],
+        },
+      ],
     };
   }
 
@@ -220,7 +237,8 @@ export class PdfExportService {
           h: element.height,
           r: element.radius,
           color: element.background,
-          lineColor: element.border ? '#d8e0ee' : element.background,
+          lineColor: element.border ? element.borderColor : element.background,
+          lineWidth: element.border ? element.borderWidth : 0,
         },
       ],
     };

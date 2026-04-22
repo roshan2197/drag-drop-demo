@@ -20,36 +20,36 @@ button {
 }
 
 .designer-shell {
-  --designer-bg: #f1f5f9;
+  --designer-bg: #f8fafc;
   --designer-panel: #ffffff;
-  --designer-panel-soft: #f8fafc;
-  --designer-text: #172033;
+  --designer-panel-soft: #eef2ff;
+  --designer-text: #0f172a;
   --designer-muted: #64748b;
-  --designer-border: #d9e2ef;
+  --designer-border: #d1d5db;
   --designer-control: #ffffff;
-  --designer-primary: #4f46e5;
-  --designer-danger: #b42318;
-  --designer-shadow: 0 18px 50px rgba(39, 52, 79, 0.08);
+  --designer-primary: #4338ca;
+  --designer-danger: #dc2626;
+  --designer-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(247, 250, 252, 0.96), rgba(237, 242, 247, 0.96)),
-    repeating-linear-gradient(90deg, rgba(79, 70, 229, 0.04) 0 1px, transparent 1px 96px);
+    linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 0.96)),
+    repeating-linear-gradient(90deg, rgba(67, 56, 202, 0.04) 0 1px, transparent 1px 96px);
 }
 
 .designer-shell.theme-dark {
-  --designer-bg: #0b1120;
+  --designer-bg: #0f172a;
   --designer-panel: #111827;
-  --designer-panel-soft: #172033;
-  --designer-text: #e5edf8;
-  --designer-muted: #9aa7bb;
-  --designer-border: #263246;
-  --designer-control: #0f172a;
-  --designer-primary: #7c83ff;
-  --designer-danger: #fb7185;
-  --designer-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
+  --designer-panel-soft: #1f2937;
+  --designer-text: #e2e8f0;
+  --designer-muted: #94a3b8;
+  --designer-border: #334155;
+  --designer-control: #111827;
+  --designer-primary: #818cf8;
+  --designer-danger: #f87171;
+  --designer-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
   background:
-    linear-gradient(180deg, rgba(11, 17, 32, 0.98), rgba(15, 23, 42, 0.98)),
-    repeating-linear-gradient(90deg, rgba(124, 131, 255, 0.08) 0 1px, transparent 1px 96px);
+    linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(17, 24, 39, 0.98)),
+    repeating-linear-gradient(90deg, rgba(129, 140, 248, 0.08) 0 1px, transparent 1px 96px);
 }
 
 .topbar {
@@ -176,7 +176,7 @@ input:focus {
 
 .workspace {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr) 360px;
+  grid-template-columns: 280px minmax(0, 1.6fr) 340px;
   gap: 18px;
   align-items: start;
   min-height: calc(100vh - 72px);

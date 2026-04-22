@@ -310,6 +310,68 @@ select:focus {
   grid-row: 2 / 3;
 }
 
+.table-style-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.table-editor {
+  display: grid;
+  gap: 14px;
+}
+
+.table-editor-grid,
+.table-rows {
+  display: grid;
+  gap: 12px;
+}
+
+.table-column-edit,
+.table-row-edit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  background: var(--designer-panel-soft, #f8fafc);
+  border: 1px solid var(--designer-border, #d8e0ee);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.table-column-edit label,
+.table-row-edit .row-cells {
+  display: grid;
+  gap: 8px;
+}
+
+.row-label {
+  color: var(--designer-text, #172033);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.row-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.table-editor-grid {
+  grid-auto-rows: minmax(0, auto);
+}
+
+.table-editor-grid .icon-button {
+  width: 36px;
+  min-width: 36px;
+}
+
+.table-editor-grid input,
+.table-row-edit input {
+  background: var(--designer-control, #ffffff);
+}
+
 .empty-state {
   border-radius: 8px;
   background: var(--designer-panel-soft, #f7fafc);

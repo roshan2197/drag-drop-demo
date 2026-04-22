@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { InspectorTab, PagePreset, ReportElement, TableOption } from '../../report-designer.models';
@@ -9,37 +9,25 @@ import { ReportStateService } from '../../services/report-state.service';
   selector: 'app-report-inspector',
   imports: [CommonModule, FormsModule],
   templateUrl: './report-inspector.component.html',
-  styleUrl: './report-inspector.component.css',
+  styleUrls: ['./report-inspector.component.css'],
 })
 export class ReportInspectorComponent {
   readonly state = inject(ReportStateService);
-  readonly activeTab = signal<InspectorTab>('element');
+  readonly activeTab = this.state.activeInspectorTab;
   readonly pagePresets: PagePreset[] = ['A4', 'Letter', 'Custom'];
-
-  constructor() {
-    effect(() => {
-      const selected = this.state.selectedElement();
-
-      if (!selected) {
-        this.activeTab.set('page');
-      } else {
-        this.activeTab.set('element');
-      }
-    });
-  }
 
   setTab(tab: InspectorTab): void {
     if (tab === 'element' && !this.state.selectedElement()) {
-      this.activeTab.set('page');
+      this.state.setInspectorTab('page');
       return;
     }
 
     if (tab === 'data' && this.state.selectedElement()?.kind !== 'table') {
-      this.activeTab.set('element');
+      this.state.setInspectorTab('element');
       return;
     }
 
-    this.activeTab.set(tab);
+    this.state.setInspectorTab(tab);
   }
 
   update(element: ReportElement, patch: Partial<ReportElement>): void {
@@ -48,7 +36,7 @@ export class ReportInspectorComponent {
 
   updateNumber(
     element: ReportElement,
-    key: 'x' | 'y' | 'width' | 'height' | 'fontSize' | 'radius',
+    key: 'x' | 'y' | 'width' | 'height' | 'fontSize' | 'radius' | 'borderWidth',
     value: number,
   ): void {
     this.state.updateElementNumber(element.id, key, value);

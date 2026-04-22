@@ -43,14 +43,15 @@ h2 {
 }
 
 .page-wrap {
-  min-height: 1230px;
+  min-height: auto;
+  max-height: calc(100vh - 210px);
   overflow: auto;
-  border: 1px solid var(--designer-border, #d9e2ef);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--designer-border, #d1d5db);
   border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(226, 232, 240, 0.72), rgba(203, 213, 225, 0.54)),
-    var(--designer-bg, #edf2f7);
-  padding: 38px;
+  background: var(--designer-bg, #f8fafc);
+  padding: 24px;
 }
 
 .report-page {
@@ -58,9 +59,9 @@ h2 {
   margin: 0 auto;
   overflow: hidden;
   transform-origin: top center;
-  border-radius: 3px;
-  background: #ffffff;
-  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.2);
+  border-radius: 12px;
+  background: var(--designer-panel, #ffffff);
+  box-shadow: 0 22px 70px rgba(15, 23, 42, 0.12);
 }
 
 .report-page.grid-on {
@@ -92,12 +93,12 @@ h2 {
   position: absolute;
   z-index: 12;
   pointer-events: none;
-  background: #f43f5e;
-  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.14);
+  background: rgba(67, 56, 202, 0.92);
+  box-shadow: 0 0 0 1px rgba(67, 56, 202, 0.18);
 }
 
 .snap-guide.page-guide {
-  background: #4f46e5;
+  background: rgba(67, 56, 202, 0.96);
 }
 
 .snap-guide.vertical {
@@ -112,7 +113,7 @@ h2 {
   position: absolute;
   z-index: 11;
   pointer-events: none;
-  color: #f43f5e;
+  color: var(--designer-primary, #4338ca);
   font-size: 10px;
   font-weight: 900;
 }
@@ -133,9 +134,10 @@ h2 {
   top: -10px;
   transform: translateX(-50%);
   border-radius: 6px;
-  background: #ffffff;
-  padding: 1px 5px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.16);
+  background: var(--designer-panel, #ffffff);
+  color: var(--designer-text, #0f172a);
+  padding: 1px 6px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
 }
 
 .measure-guide.vertical span {
@@ -148,7 +150,7 @@ h2 {
   position: absolute;
   z-index: 13;
   border-radius: 8px;
-  background: #172033;
+  background: var(--designer-primary, #4338ca);
   color: #ffffff;
   padding: 5px 8px;
   font-size: 11px;
@@ -229,7 +231,7 @@ h2 {
 
 .data-table th,
 .data-table td {
-  border-bottom: 1px solid #e7edf5;
+  border-bottom: 1px solid var(--designer-border, #e2e8f0);
   padding: 10px 12px;
   text-align: left;
   vertical-align: middle;

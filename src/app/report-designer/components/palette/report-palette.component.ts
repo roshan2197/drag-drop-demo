@@ -6,7 +6,7 @@ import { ReportStateService } from '../../services/report-state.service';
 @Component({
   selector: 'app-report-palette',
   templateUrl: './report-palette.component.html',
-  styleUrl: './report-palette.component.css',
+  styleUrls: ['./report-palette.component.css'],
 })
 export class ReportPaletteComponent {
   readonly state = inject(ReportStateService);

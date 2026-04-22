@@ -39,12 +39,6 @@
       <button class="icon-button" type="button" (click)="state.toggleTheme()" title="Toggle theme">
         {{ state.theme() === 'dark' ? '☼' : '◐' }}
       </button>
-      <button class="icon-button" type="button" (click)="state.sendBackward()" title="Send backward">
-        ↓
-      </button>
-      <button class="icon-button" type="button" (click)="state.bringForward()" title="Bring forward">
-        ↑
-      </button>
       <button class="text-button" type="button" (click)="state.duplicateSelected()">Duplicate</button>
       <button class="text-button danger" type="button" (click)="state.deleteSelected()">Delete</button>
       <button class="primary-button" type="button" (click)="exportPdf()">Export PDF</button>

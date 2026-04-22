@@ -6,6 +6,6 @@ import { ReportDesignerComponent } from './report-designer/report-designer.compo
   selector: 'app-root',
   imports: [ReportDesignerComponent],
   templateUrl: './app.html',
-  styleUrl: './app.css',
+  styleUrls: ['./app.css'],
 })
 export class App {}

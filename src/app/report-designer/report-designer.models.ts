@@ -47,6 +47,8 @@ export interface ReportElement {
   align: TextAlign;
   bold: boolean;
   border: boolean;
+  borderWidth: number;
+  borderColor: string;
   radius: number;
   table?: TableData;
 }
@@ -70,6 +72,7 @@ export interface ActiveDrag {
   originalWidth: number;
   originalHeight: number;
   handle?: ResizeHandle;
+  changed?: boolean;
 }
 
 export interface SnapGuide {

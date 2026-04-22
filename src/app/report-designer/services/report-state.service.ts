@@ -3,6 +3,7 @@ import { computed, Injectable, signal } from '@angular/core';
 import seedReport from '../report-template.json';
 import {
   ElementKind,
+  InspectorTab,
   PagePreset,
   PaletteItem,
   ReportDocument,
@@ -33,13 +34,28 @@ export class ReportStateService {
 
   readonly report = signal<ReportDocument>(this.loadInitialReport());
   readonly selectedId = signal(this.report().elements[1]?.id ?? '');
+  readonly selectedIds = signal<string[]>([this.selectedId() || '']);
   readonly showGrid = signal(true);
   readonly zoom = signal(86);
   readonly theme = signal<ThemeMode>(this.loadTheme());
 
+  readonly activeInspectorTab = signal<InspectorTab>('element');
   readonly selectedElement = computed(() =>
     this.report().elements.find((element) => element.id === this.selectedId()),
   );
+  readonly selectedElements = computed(() =>
+    this.report().elements.filter((element) => this.selectedIds().includes(element.id)),
+  );
+  readonly canUndo = signal(false);
+  readonly canRedo = signal(false);
+  readonly historyCount = signal(0);
+  readonly futureCount = signal(0);
+  readonly clipboard = signal<ReportElement[] | null>(null);
+  readonly syncStatus = signal<'saved' | 'saving'>('saved');
+  readonly lastSyncedAt = signal<string>(new Date().toLocaleTimeString());
+
+  private readonly history: ReportDocument[] = [];
+  private readonly future: ReportDocument[] = [];
 
   // Public mutations are the single write path for the designer.
   // Replacing `sync` with an HTTP save later will keep the components unchanged.
@@ -69,12 +85,37 @@ export class ReportStateService {
     this.sync(document);
   }
 
-  setSelected(id: string): void {
-    this.selectedId.set(id);
+  setInspectorTab(tab: InspectorTab): void {
+    this.activeInspectorTab.set(tab);
+  }
+
+  setSelected(id: string, activateInspector = false, additive = false): void {
+    if (additive) {
+      const currentSelection = this.selectedIds().filter(Boolean);
+      const isSelected = currentSelection.includes(id);
+
+      if (isSelected) {
+        const nextSelection = currentSelection.filter((selected) => selected !== id);
+        this.selectedIds.set(nextSelection);
+        this.selectedId.set(nextSelection[0] ?? '');
+      } else {
+        this.selectedIds.set([...currentSelection, id]);
+        this.selectedId.set(id);
+      }
+    } else {
+      this.selectedIds.set([id]);
+      this.selectedId.set(id);
+    }
+
+    if (activateInspector) {
+      this.setInspectorTab('element');
+    }
   }
 
   clearSelection(): void {
+    this.selectedIds.set([]);
     this.selectedId.set('');
+    this.setInspectorTab('page');
   }
 
   setTheme(theme: ThemeMode): void {
@@ -87,7 +128,7 @@ export class ReportStateService {
   }
 
   setZoom(value: number): void {
-    this.zoom.set(Math.max(50, Math.min(140, Math.round(value))));
+    this.zoom.set(Math.max(25, Math.min(500, Math.round(value))));
   }
 
   zoomBy(delta: number): void {
@@ -102,6 +143,7 @@ export class ReportStateService {
     const document = this.cloneReport();
     const element = this.createElement(kind, this.snap(x), this.snap(y), document);
     document.elements.push(element);
+    this.selectedIds.set([element.id]);
     this.selectedId.set(element.id);
     this.sync(document);
   }
@@ -115,7 +157,7 @@ export class ReportStateService {
 
   updateElementNumber(
     id: string,
-    key: 'x' | 'y' | 'width' | 'height' | 'fontSize' | 'radius',
+    key: 'x' | 'y' | 'width' | 'height' | 'fontSize' | 'radius' | 'borderWidth',
     value: number,
   ): void {
     this.mutateElement(id, (element, document) => {
@@ -124,59 +166,215 @@ export class ReportStateService {
     });
   }
 
-  moveElement(id: string, x: number, y: number, snapToGrid = true): void {
-    this.mutateElement(id, (element, document) => {
-      element.x = this.constrainX(snapToGrid ? this.snap(x) : Math.round(x), element.width, document);
-      element.y = this.constrainY(snapToGrid ? this.snap(y) : Math.round(y), element.height, document);
-    });
+  moveElement(
+    id: string,
+    x: number,
+    y: number,
+    snapToGrid = true,
+    record = true,
+    persist = true,
+  ): void {
+    this.mutateElement(
+      id,
+      (element, document) => {
+        element.x = this.constrainX(snapToGrid ? this.snap(x) : Math.round(x), element.width, document);
+        element.y = this.constrainY(snapToGrid ? this.snap(y) : Math.round(y), element.height, document);
+      },
+      record,
+      persist,
+    );
   }
 
-  resizeElement(id: string, width: number, height: number, snapToGrid = true): void {
-    this.mutateElement(id, (element, document) => {
-      element.width = this.constrainWidth(
-        snapToGrid ? this.snap(width) : Math.round(width),
-        element.x,
-        document,
-      );
-      element.height = this.constrainHeight(
-        snapToGrid ? this.snap(height) : Math.round(height),
-        element.y,
-        document,
-      );
-    });
+  resizeElement(
+    id: string,
+    width: number,
+    height: number,
+    snapToGrid = true,
+    record = true,
+    persist = true,
+  ): void {
+    this.mutateElement(
+      id,
+      (element, document) => {
+        element.width = this.constrainWidth(
+          snapToGrid ? this.snap(width) : Math.round(width),
+          element.x,
+          document,
+        );
+        element.height = this.constrainHeight(
+          snapToGrid ? this.snap(height) : Math.round(height),
+          element.y,
+          document,
+        );
+      },
+      record,
+      persist,
+    );
   }
 
-  duplicateSelected(): void {
-    const selected = this.selectedElement();
+  moveSelectedBy(deltaX: number, deltaY: number): void {
+    const selectedIds = this.selectedIds().filter(Boolean);
 
-    if (!selected) {
+    if (selectedIds.length === 0) {
       return;
     }
 
     const document = this.cloneReport();
-    const duplicate: ReportElement = {
-      ...this.clone(selected),
-      id: this.createId(),
-      title: `${selected.title} copy`,
-      x: this.constrainX(selected.x + 24, selected.width, document),
-      y: this.constrainY(selected.y + 24, selected.height, document),
-    };
-    document.elements.push(duplicate);
-    this.selectedId.set(duplicate.id);
+    const elements = document.elements.filter((element) => selectedIds.includes(element.id));
+
+    elements.forEach((element) => {
+      element.x = this.constrainX(this.snap(element.x + deltaX), element.width, document);
+      element.y = this.constrainY(this.snap(element.y + deltaY), element.height, document);
+    });
+
     this.sync(document);
   }
 
-  deleteSelected(): void {
-    const selectedId = this.selectedId();
+  copySelected(): void {
+    const selected = this.selectedElements();
 
-    if (!selectedId) {
+    if (selected.length === 0) {
+      return;
+    }
+
+    this.clipboard.set(selected.map((element) => this.clone(element)));
+  }
+
+  cutSelected(): void {
+    this.copySelected();
+    this.deleteSelected();
+  }
+
+  pasteClipboard(): void {
+    const clipboard = this.clipboard();
+
+    if (!clipboard || clipboard.length === 0) {
       return;
     }
 
     const document = this.cloneReport();
-    const index = document.elements.findIndex((element) => element.id === selectedId);
-    document.elements = document.elements.filter((element) => element.id !== selectedId);
-    this.selectedId.set(document.elements[Math.max(0, index - 1)]?.id ?? '');
+    const originX = Math.min(...clipboard.map((element) => element.x));
+    const originY = Math.min(...clipboard.map((element) => element.y));
+    const addedIds: string[] = [];
+
+    clipboard.forEach((element) => {
+      const cloneElement = this.clone(element);
+      cloneElement.id = this.createId();
+      cloneElement.x = this.constrainX(cloneElement.x - originX + 24, cloneElement.width, document);
+      cloneElement.y = this.constrainY(cloneElement.y - originY + 24, cloneElement.height, document);
+      document.elements.push(cloneElement);
+      addedIds.push(cloneElement.id);
+    });
+
+    this.selectedIds.set(addedIds);
+    this.selectedId.set(addedIds[0]);
+    this.sync(document);
+  }
+
+  commitDrag(): void {
+    this.sync(this.cloneReport());
+  }
+
+  undo(): void {
+    if (this.history.length === 0) {
+      return;
+    }
+
+    const previous = this.history.pop();
+    if (!previous) {
+      return;
+    }
+
+    this.future.push(this.cloneReport());
+    this.futureCount.set(this.future.length);
+    this.sync(previous, false);
+    this.canUndo.set(this.history.length > 0);
+  }
+
+  redo(): void {
+    if (this.future.length === 0) {
+      return;
+    }
+
+    const next = this.future.pop();
+    if (!next) {
+      return;
+    }
+
+    this.history.push(this.cloneReport());
+    this.historyCount.set(this.history.length);
+    this.sync(next, false);
+    this.canRedo.set(this.future.length > 0);
+  }
+
+  private recordHistory(document: ReportDocument): void {
+    this.history.push(this.clone(this.report()));
+    if (this.history.length > 50) {
+      this.history.shift();
+    }
+    this.historyCount.set(this.history.length);
+    this.future.length = 0;
+    this.futureCount.set(0);
+    this.canUndo.set(this.history.length > 0);
+    this.canRedo.set(false);
+  }
+
+  private clearHistory(): void {
+    this.history.length = 0;
+    this.future.length = 0;
+    this.historyCount.set(0);
+    this.futureCount.set(0);
+    this.canUndo.set(false);
+    this.canRedo.set(false);
+  }
+
+  duplicateSelected(): void {
+    const selectedIds = this.selectedIds().filter(Boolean);
+
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    const document = this.cloneReport();
+    const addedIds: string[] = [];
+
+    selectedIds.forEach((id) => {
+      const selected = document.elements.find((element) => element.id === id);
+      if (!selected) {
+        return;
+      }
+
+      const duplicate: ReportElement = {
+        ...this.clone(selected),
+        id: this.createId(),
+        title: `${selected.title} copy`,
+        x: this.constrainX(selected.x + 24, selected.width, document),
+        y: this.constrainY(selected.y + 24, selected.height, document),
+      };
+
+      document.elements.push(duplicate);
+      addedIds.push(duplicate.id);
+    });
+
+    if (addedIds.length > 0) {
+      this.selectedIds.set(addedIds);
+      this.selectedId.set(addedIds[0]);
+      this.sync(document);
+    }
+  }
+
+  deleteSelected(): void {
+    const selectedIds = this.selectedIds().filter(Boolean);
+
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    const document = this.cloneReport();
+    document.elements = document.elements.filter((element) => !selectedIds.includes(element.id));
+    const nextId = document.elements[0]?.id ?? '';
+    this.selectedIds.set(nextId ? [nextId] : []);
+    this.selectedId.set(nextId);
     this.sync(document);
   }
 
@@ -260,19 +458,30 @@ export class ReportStateService {
 
   async importJson(file: File): Promise<void> {
     const document = JSON.parse(await file.text()) as ReportDocument;
-    this.selectedId.set(document.elements[0]?.id ?? '');
-    this.sync(this.normalizeReport(document));
+    const normalized = this.normalizeReport(document);
+    const firstId = normalized.elements[0]?.id ?? '';
+
+    this.clearHistory();
+    this.selectedIds.set(firstId ? [firstId] : []);
+    this.selectedId.set(firstId);
+    this.sync(normalized, false);
   }
 
   resetToTemplate(): void {
     const document = this.normalizeReport(seedReport as ReportDocument);
-    this.selectedId.set(document.elements[1]?.id ?? '');
-    this.sync(document);
+    const defaultId = document.elements[1]?.id ?? document.elements[0]?.id ?? '';
+
+    this.clearHistory();
+    this.selectedIds.set(defaultId ? [defaultId] : []);
+    this.selectedId.set(defaultId);
+    this.sync(document, false);
   }
 
   private mutateElement(
     id: string,
     mutator: (element: ReportElement, document: ReportDocument) => void,
+    record = true,
+    persist = true,
   ): void {
     const document = this.cloneReport();
     const element = document.elements.find((item) => item.id === id);
@@ -282,7 +491,7 @@ export class ReportStateService {
     }
 
     mutator(element, document);
-    this.sync(document);
+    this.sync(document, record, persist);
   }
 
   private mutateTable(elementId: string, mutator: (table: TableData) => void): void {
@@ -312,14 +521,20 @@ export class ReportStateService {
 
   // `sync` is intentionally tiny: normalize, publish signal, persist snapshot.
   // Backend persistence can be added here without changing canvas/inspector code.
-  private sync(document: ReportDocument): void {
+  private sync(document: ReportDocument, record = true, persist = true): void {
     const nextDocument = this.normalizeReport({
       ...document,
       updatedAt: new Date().toISOString(),
     });
 
+    if (record) {
+      this.recordHistory(nextDocument);
+    }
+
     this.report.set(nextDocument);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextDocument));
+    if (persist) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextDocument));
+    }
   }
 
   private loadInitialReport(): ReportDocument {
@@ -370,6 +585,8 @@ export class ReportStateService {
       align: element.align ?? 'left',
       bold: element.bold ?? false,
       border: element.border ?? false,
+      borderWidth: element.borderWidth ?? 1,
+      borderColor: element.borderColor ?? '#d8e0ee',
       radius: element.radius ?? 8,
     };
 
@@ -394,6 +611,8 @@ export class ReportStateService {
       y,
       align: 'left' as const,
       border: false,
+      borderWidth: 1,
+      borderColor: '#d8e0ee',
       bold: false,
       radius: 8,
     };
