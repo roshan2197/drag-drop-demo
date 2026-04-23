@@ -1,59 +1,67 @@
-# DragDropDemo
+# Drag Drop Demo
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.2.
+A modern Angular report designer application built with Angular 21. The app includes drag-and-drop page composition, canvas zoom controls, element inspector editing, undo/redo, clipboard actions, and PDF export.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- Drag palette components onto the report canvas
+- Select, move, resize, and edit page elements
+- Page-level settings for size, margin, and background
+- Dark mode support
+- Keyboard shortcuts for undo/redo, copy/cut/paste, delete, and arrow movement
+- PDF export using `pdfmake`
+- Local JSON export/import and browser persistence
 
-```bash
-ng serve
-```
+## Quick Start
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Install dependencies:
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
-
-To build the project run:
+Run the development server:
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open the app at `http://localhost:4200/`.
 
-## Running unit tests
+## Available Scripts
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+- `npm start` - Launches the Angular development server
+- `npm run build` - Builds the app for production in `dist/`
+- `npm test` - Runs unit tests
+- `npm run gh-pages` - Builds the app and deploys to GitHub Pages
 
-```bash
-ng test
-```
+## Project Structure
 
-## Running end-to-end tests
+- `src/main.ts` - Application bootstrap
+- `src/app/app.ts` - Root application component
+- `src/app/report-designer/` - Main designer feature
+  - `report-designer.component.ts` / `.html` / `.css` - Designer shell and toolbar
+  - `components/palette/` - Drag palette UI
+  - `components/canvas/` - Report canvas, zoom, and drag handling
+  - `components/inspector/` - Property inspector and page settings
+  - `services/report-state.service.ts` - Signal-based state management and undo/redo
+  - `services/pdf-export.service.ts` - PDF generation helper
 
-For end-to-end (e2e) testing, run:
+## Styling and UX
 
-```bash
-ng e2e
-```
+The app uses a custom component-based UI with responsive layout rules:
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- Left palette panel for element types
+- Middle canvas panel for document preview and interaction
+- Right inspector panel for selected element/page properties
+- Sticky top toolbar with action buttons and live sync/page metadata
 
-## Additional Resources
+## Notes
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Copy/cut/paste operates on the application clipboard and works when an element is selected
+- PDF export is lazy-loaded and generates output in the browser
+- The app is designed to work in both light and dark themes
+
+## License
+
+This project is provided as-is for demonstration and development.
